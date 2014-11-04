@@ -33,9 +33,17 @@ static int moarvm_init() {
 	moarvm.main->raw_clargs = tmp_args;
 	moarvm.main->prog_name = moarvm.load;
 	uwsgi_log("I Am MoarVM at %p\n");
-	if (moarvm.load) {
-		MVM_vm_run_file(moarvm.main, moarvm.load);
-		uwsgi_log("%s loaded\n", moarvm.load);
+	if (!moarvm.load) return 0;
+
+	MVM_vm_run_file(moarvm.main, moarvm.load);
+	uwsgi_log("%s loaded\n", moarvm.load);
+
+	MVMThreadContext *tc = moarvm.main->main_thread;
+	MVMCompUnit      *cu = MVM_cu_map_from_file(tc, moarvm.load);
+	uwsgi_log("cu = %p %p\n", cu, tc->cur_frame);
+	uint32_t i;
+	for(i=0;i<cu->body.num_frames;i++) {
+		uwsgi_log("frame %s\n", MVM_string_utf8_encode_C_string(tc, cu->body.frames[i]->body.name));
 	}
 	return 0;
 }

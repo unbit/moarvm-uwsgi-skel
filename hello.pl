@@ -1,7 +1,7 @@
 my $foo := 'bar';
 
-sub app() {
+sub app_to_call() {
 	say($foo);
 }
 
-app();
+app_to_call();
